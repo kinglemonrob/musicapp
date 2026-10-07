@@ -9,7 +9,8 @@
   <title>Local Player</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="app.css">
-  <script src="app.js" defer></script>
+  <link rel="stylesheet" href="game.css">
+  <script type="module" src="app.js"></script>
 </head>
 <body>
   <header class="topbar">
@@ -21,7 +22,8 @@
     <button class="icon-button" id="settingsButton" type="button" aria-label="Open player settings" title="Customize">Settings</button>
   </header>
 
-  <main class="workspace">
+  <main class="workspace" id="workspace">
+    <div class="drop-overlay" aria-hidden="true">Drop audio files to add them</div>
     <section class="deck" aria-label="Music player">
       <div class="track-heading">
         <div>
@@ -68,6 +70,51 @@
         <label class="toggle-line"><input id="showVisualizer" type="checkbox" checked><span>Visualizer</span></label>
         <span class="format-note">Tempo also shifts pitch in this browser player.</span>
       </div>
+
+      <section class="rhythm-game" aria-label="osu! Standard rhythm game">
+        <div class="game-heading">
+          <div><p class="eyebrow">RHYTHM MODE</p><h2 id="gameTitle">osu! Standard</h2></div>
+          <div class="game-actions">
+            <div class="game-mode-tabs" role="group" aria-label="Choose a rhythm mode">
+              <button class="is-selected" type="button" data-game-mode="osu" aria-pressed="true">osu!</button>
+              <button type="button" data-game-mode="fire-ice" aria-pressed="false">Fire &amp; Ice</button>
+            </div>
+            <button class="game-toggle" id="gameToggle" type="button">Choose song</button>
+          </div>
+        </div>
+        <div class="game-status-row">
+          <span class="game-status" id="gameStatus" role="status" aria-live="polite">Choose a track to analyze</span>
+          <span class="game-feedback" id="gameFeedback" aria-live="polite">300 / 100 / 50</span>
+        </div>
+        <div class="game-metrics" aria-label="Game stats">
+          <div><span>Tempo</span><strong id="gameBpm">--</strong></div>
+          <div><span>Score</span><strong id="gameScore">0</strong></div>
+          <div><span>Combo</span><strong id="gameCombo">0</strong></div>
+          <div><span>Accuracy</span><strong id="gameAccuracy">100.00%</strong></div>
+        </div>
+        <div class="game-health" role="meter" aria-label="Health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+          <div id="gameHealthFill"></div>
+        </div>
+        <div class="game-playfield">
+          <canvas id="beatGameCanvas" aria-label="osu! playfield. Click or tap numbered circles as their approach rings close." role="img"></canvas>
+        </div>
+        <div class="game-controls">
+          <button class="beat-hit" id="beatTapButton" type="button" disabled>Hit circle <kbd>Z</kbd><kbd>X</kbd></button>
+          <fieldset class="difficulty-tabs">
+            <legend>Beat density</legend>
+            <button type="button" data-game-difficulty="easy" aria-pressed="false">Easy</button>
+            <button class="is-selected" type="button" data-game-difficulty="normal" aria-pressed="true">Normal</button>
+            <button type="button" data-game-difficulty="hard" aria-pressed="false">Hard</button>
+          </fieldset>
+        </div>
+        <div class="game-settings-row">
+          <label for="gameLatency">Latency <output id="gameLatencyValue">0 ms</output></label>
+          <input id="gameLatency" type="range" min="-150" max="150" step="1" value="0">
+          <label class="game-check"><input id="gameNoFail" type="checkbox"> No-fail practice</label>
+          <label class="game-check"><input id="beatDebugToggle" type="checkbox"> Beat debug</label>
+        </div>
+        <p class="game-help" id="gameHelp">Click/tap circles on the beat. Hold sliders and spin during gaps. Z / X are hit keys.</p>
+      </section>
     </section>
 
     <aside class="library" aria-label="Music library">
@@ -81,6 +128,10 @@
         <input id="fileInput" type="file" accept="audio/*,.mp3,.wav,.flac,.m4a,.ogg,.aac" multiple hidden>
         <input id="folderInput" type="file" accept="audio/*" webkitdirectory multiple hidden>
       </div>
+      <label class="search-field">
+        <span class="visually-hidden">Search your audio library</span>
+        <input id="queueSearch" type="search" placeholder="Search tracks or folders" autocomplete="off">
+      </label>
       <p class="library-hint">Choose a folder to scan its audio files and subfolders. Tracks 40 seconds or longer go in Music; shorter or unreadable files go in Other. Nothing is uploaded.</p>
       <div class="category-tabs" role="group" aria-label="Filter audio by category">
         <button class="category-tab is-active" type="button" data-queue-filter="all" aria-pressed="true">All <span id="allCount">0</span></button>
@@ -118,6 +169,22 @@
       <label class="toggle-line"><input id="volumeColor" type="checkbox" checked><span>Progress color follows volume</span></label>
     </div>
     <button id="resetSettings" class="reset-button" type="button">Reset settings</button>
+  </dialog>
+
+  <dialog id="gameResultsDialog" class="game-results">
+    <p class="eyebrow">TRACK COMPLETE</p>
+    <h2 id="resultRank">SS</h2>
+    <div class="results-grid">
+      <div><span>Score</span><strong id="resultScore">0</strong></div>
+      <div><span>Accuracy</span><strong id="resultAccuracy">100.00%</strong></div>
+      <div><span>Best combo</span><strong id="resultCombo">0</strong></div>
+      <div><span>Hits</span><strong id="resultHits">0</strong></div>
+      <div><span>Misses</span><strong id="resultMisses">0</strong></div>
+    </div>
+    <div class="results-actions">
+      <button class="text-button" id="resultsRestart" type="button">Play again</button>
+      <button class="close-button" id="resultsClose" type="button">Done</button>
+    </div>
   </dialog>
 
   <audio id="audio" preload="metadata"></audio>

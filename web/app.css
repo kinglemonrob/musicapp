@@ -69,6 +69,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, canvas:focus-vi
 button:active { transform: translateY(1px); }
 
 .workspace {
+  position: relative;
   width: min(1180px, calc(100% - 36px));
   margin: 36px auto;
   display: grid;
@@ -76,6 +77,8 @@ button:active { transform: translateY(1px); }
   gap: 18px;
   align-items: start;
 }
+.drop-overlay { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; border: 2px dashed transparent; border-radius: 8px; background: rgba(16, 21, 23, .9); color: var(--mint); font-size: 20px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .16s ease, border-color .16s ease; }
+.workspace.is-dragging .drop-overlay { border-color: var(--mint); opacity: 1; }
 
 .deck, .library {
   border: 1px solid var(--line);
@@ -124,6 +127,44 @@ input[type="range"] { height: 18px; accent-color: var(--mint); cursor: pointer; 
 .toggle-line input { width: 16px; height: 16px; accent-color: var(--mint); }
 .format-note { color: var(--muted); font-size: 10px; text-align: right; }
 
+.rhythm-game { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+.game-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 12px; }
+.game-heading h2 { margin: 3px 0 0; font-size: 19px; font-weight: 600; }
+.game-actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+.game-mode-tabs { display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 5px; background: #111719; }
+.game-mode-tabs button { padding: 6px 8px; border: 0; border-radius: 3px; background: transparent; color: var(--muted); font-size: 10px; cursor: pointer; }
+.game-mode-tabs button.is-selected { background: #293534; color: var(--mint); }
+.difficulty-tabs { display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 5px; background: #111719; }
+.difficulty-tabs button { padding: 6px 8px; border: 0; border-radius: 3px; background: transparent; color: var(--muted); font-size: 10px; cursor: pointer; }
+.difficulty-tabs button.is-selected { background: #293534; color: var(--mint); }
+.game-toggle { min-height: 31px; padding: 7px 11px; border: 1px solid #4c665e; border-radius: 5px; background: rgba(94,227,189,.1); color: var(--mint); font-size: 11px; font-weight: 600; cursor: pointer; }
+.game-toggle:hover:not(:disabled) { border-color: var(--mint); background: rgba(94,227,189,.18); }
+.game-toggle:disabled { opacity: .45; cursor: not-allowed; }
+.game-metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 9px; }
+.game-metrics div { display: flex; align-items: baseline; gap: 7px; min-width: 0; }
+.game-metrics span { color: var(--muted); font-family: var(--mono); font-size: 9px; text-transform: uppercase; }
+.game-metrics strong { color: var(--text); font-family: var(--mono); font-size: 13px; font-weight: 500; }
+.game-metrics small { color: var(--muted); font-size: 8px; }
+.game-playfield { overflow: hidden; border: 1px solid #334244; border-radius: 6px; background: #0c1518; box-shadow: inset 0 0 30px rgba(0,0,0,.3); }
+#beatGameCanvas { width: 100%; height: 220px; display: block; cursor: crosshair; touch-action: manipulation; }
+.game-controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; }
+.orbit-buttons { display: flex; gap: 7px; }
+.orbit-buttons[hidden], .beat-hit[hidden] { display: none; }
+.orbit-buttons button { min-width: 94px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 4px; background: #141c1e; color: var(--text); font-size: 10px; cursor: pointer; }
+.orbit-buttons button[data-orbit-hit="fire"] { border-color: rgba(255,128,102,.5); color: #ff9b82; }
+.orbit-buttons button[data-orbit-hit="ice"] { border-color: rgba(117,240,255,.45); color: #8ceefa; }
+.orbit-buttons button:disabled { opacity: .45; cursor: not-allowed; }
+.orbit-buttons kbd { margin-left: 5px; padding: 2px 4px; border: 1px solid currentColor; border-radius: 3px; font-family: var(--mono); font-size: 8px; }
+.beat-hit { min-width: 120px; padding: 8px 10px; border: 1px solid #4c665e; border-radius: 4px; background: var(--mint); color: #10201d; font-size: 11px; font-weight: 700; cursor: pointer; }
+.beat-hit:hover:not(:disabled) { background: #8df0d1; }
+.beat-hit:disabled { opacity: .45; cursor: not-allowed; }
+.beat-hit kbd { margin-left: 8px; padding: 2px 5px; border: 1px solid rgba(16,32,29,.35); border-radius: 3px; color: #10201d; font-family: var(--mono); font-size: 9px; }
+.game-bottomline { display: flex; align-items: baseline; flex-wrap: wrap; gap: 5px 12px; margin-top: 8px; }
+.game-status, .game-feedback, .game-instructions { color: var(--muted); font-family: var(--mono); font-size: 9px; }
+.game-status { color: var(--mint); }
+.game-feedback { min-height: 12px; }
+.game-instructions { margin-left: auto; text-align: right; }
+
 .library { min-height: 560px; padding: 22px; }
 .library-heading { align-items: end; }
 .library-heading h2 { margin: 3px 0 0; font-size: 23px; font-weight: 600; }
@@ -131,6 +172,10 @@ input[type="range"] { height: 18px; accent-color: var(--mint); cursor: pointer; 
 .library-actions { display: flex; gap: 8px; margin: 19px 0 12px; }
 .add-button { flex: 1; padding: 11px; border: 0; border-radius: 5px; background: var(--coral); color: #211411; font-size: 12px; font-weight: 700; cursor: pointer; }
 .add-button:hover { background: #ff927e; }
+.search-field { display: block; margin-bottom: 12px; }
+.search-field input { width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 5px; background: #12181a; color: var(--text); font-size: 12px; }
+.search-field input::placeholder { color: #7f8c8d; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; clip-path: inset(50%); }
 .library-hint { margin: 0 0 15px; padding: 10px; border-left: 2px solid var(--gold); background: rgba(247,201,93,.06); color: #bdc3bb; font-size: 11px; line-height: 1.5; }
 .category-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 0 0 10px; padding: 4px; border: 1px solid var(--line); border-radius: 5px; background: #12181a; }
 .category-tab { display: flex; justify-content: center; gap: 6px; padding: 8px 4px; border: 0; border-radius: 3px; background: transparent; color: var(--muted); font-size: 11px; cursor: pointer; }
@@ -176,6 +221,15 @@ input[type="range"] { height: 18px; accent-color: var(--mint); cursor: pointer; 
   .visualizer-shell { height: 118px; margin-top: 18px; }
   .library { min-height: 0; padding: 18px; }
   .empty-queue { min-height: 110px; }
+  .game-heading { align-items: flex-start; flex-direction: column; }
+  .game-actions { width: 100%; justify-content: space-between; }
+  .game-mode-tabs { width: 100%; }
+  .game-mode-tabs button { flex: 1; }
+  .game-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 9px; }
+  #beatGameCanvas { height: 200px; }
+  .game-instructions { width: 100%; margin-left: 0; text-align: left; }
+  .orbit-buttons { width: 100%; }
+  .orbit-buttons button { flex: 1; }
 }
 
 @media (max-width: 430px) {
