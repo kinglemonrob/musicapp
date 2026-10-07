@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111619">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Local Player</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="app.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Local Player home">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span>LOCAL PLAYER</span>
+    </a>
+    <div class="local-status"><span class="status-dot"></span> Your music stays on this device</div>
+    <button class="icon-button" id="settingsButton" type="button" aria-label="Open player settings" title="Customize">Settings</button>
+  </header>
+
+  <main class="workspace">
+    <section class="deck" aria-label="Music player">
+      <div class="track-heading">
+        <div>
+          <p class="eyebrow">NOW PLAYING</p>
+          <h1 id="trackTitle">Choose some music</h1>
+          <p id="trackMeta" class="muted">Add audio files from your device to get started.</p>
+        </div>
+        <button class="text-button" id="settingsButtonSmall" type="button">Customize</button>
+      </div>
+
+      <div class="visualizer-shell" id="visualizerShell">
+        <canvas id="visualizer" aria-label="Audio visualizer"></canvas>
+        <div class="visualizer-empty" id="visualizerEmpty">A little sound, a little color.</div>
+      </div>
+
+      <div class="progress-area">
+        <canvas id="progress" role="slider" tabindex="0" aria-label="Track position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></canvas>
+        <div class="time-row"><span id="currentTime">0:00</span><span id="duration">0:00</span></div>
+      </div>
+
+      <div class="transport" aria-label="Playback controls">
+        <button class="transport-button" id="previousButton" type="button" aria-label="Previous track" title="Previous">Prev</button>
+        <button class="play-button" id="playButton" type="button" aria-label="Play" disabled>Play</button>
+        <button class="transport-button" id="stopButton" type="button" aria-label="Stop" title="Stop">Stop</button>
+        <button class="transport-button" id="nextButton" type="button" aria-label="Next track" title="Next">Next</button>
+      </div>
+
+      <div class="mixer">
+        <label class="control-row" for="volume">
+          <span class="control-name">Volume</span><output id="volumeValue">70%</output>
+          <input id="volume" type="range" min="0" max="100" value="70">
+        </label>
+        <label class="control-row" for="tempo">
+          <span class="control-name">Tempo</span><output id="tempoValue">100%</output>
+          <input id="tempo" type="range" min="70" max="130" value="100">
+        </label>
+        <label class="control-row" for="transpose">
+          <span class="control-name">Transpose</span><output id="transposeValue">0 st</output>
+          <input id="transpose" type="range" min="-12" max="12" value="0">
+        </label>
+      </div>
+
+      <div class="deck-footer">
+        <label class="toggle-line"><input id="showVisualizer" type="checkbox" checked><span>Visualizer</span></label>
+        <span class="format-note">Tempo also shifts pitch in this browser player.</span>
+      </div>
+    </section>
+
+    <aside class="library" aria-label="Music library">
+      <div class="library-heading">
+        <div><p class="eyebrow">YOUR LIBRARY</p><h2>Audio</h2></div>
+        <span class="track-count" id="trackCount">0 tracks</span>
+      </div>
+      <div class="library-actions">
+        <button class="add-button" id="addFilesButton" type="button">Add audio</button>
+        <button class="text-button" id="addFolderButton" type="button">Scan folder</button>
+        <input id="fileInput" type="file" accept="audio/*,.mp3,.wav,.flac,.m4a,.ogg,.aac" multiple hidden>
+        <input id="folderInput" type="file" accept="audio/*" webkitdirectory multiple hidden>
+      </div>
+      <p class="library-hint">Choose a folder to scan its audio files and subfolders. Tracks 40 seconds or longer go in Music; shorter or unreadable files go in Other. Nothing is uploaded.</p>
+      <div class="category-tabs" role="group" aria-label="Filter audio by category">
+        <button class="category-tab is-active" type="button" data-queue-filter="all" aria-pressed="true">All <span id="allCount">0</span></button>
+        <button class="category-tab" type="button" data-queue-filter="Music" aria-pressed="false">Music <span id="musicCount">0</span></button>
+        <button class="category-tab" type="button" data-queue-filter="Other" aria-pressed="false">Other <span id="otherCount">0</span></button>
+      </div>
+      <p class="scan-status" id="scanStatus" role="status" aria-live="polite"></p>
+      <ol class="track-list" id="trackList"></ol>
+      <div class="empty-queue" id="emptyQueue">
+        <span class="empty-mark" aria-hidden="true">+</span>
+        <strong>Your queue is empty</strong>
+        <span>Add one or more audio files.</span>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="settingsDialog" class="settings-dialog">
+    <form method="dialog" class="settings-header">
+      <div><p class="eyebrow">MAKE IT YOURS</p><h2>Player settings</h2></div>
+      <button class="close-button" value="close" aria-label="Close settings">Done</button>
+    </form>
+    <div class="settings-grid">
+      <label>Visualizer style<select id="visualizerStyle"></select></label>
+      <label>Color preset<select id="colorPreset"></select></label>
+      <label>Visualizer bars<output id="barCountValue">48</output><input id="barCount" type="range" min="16" max="96" value="48"></label>
+      <label>Glow<output id="glowValue">45%</output><input id="glow" type="range" min="0" max="100" value="45"></label>
+      <label>Progress style<select id="progressStyle"></select></label>
+      <label>Progress glow<output id="progressGlowValue">45%</output><input id="progressGlow" type="range" min="0" max="100" value="45"></label>
+      <label class="color-picker">Custom visualizer color<input id="customColor" type="color" value="#52f2c2"></label>
+    </div>
+    <div class="settings-toggles">
+      <label class="toggle-line"><input id="rainbow" type="checkbox"><span>Cycle rainbow colors</span></label>
+      <label class="toggle-line"><input id="smooth" type="checkbox" checked><span>Smooth visualizer movement</span></label>
+      <label class="toggle-line"><input id="calm" type="checkbox" checked><span>Calm to idle when stopped</span></label>
+      <label class="toggle-line"><input id="volumeColor" type="checkbox" checked><span>Progress color follows volume</span></label>
+    </div>
+    <button id="resetSettings" class="reset-button" type="button">Reset settings</button>
+  </dialog>
+
+  <audio id="audio" preload="metadata"></audio>
+</body>
+</html>

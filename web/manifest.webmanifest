@@ -1,0 +1,9 @@
+{
+  "name": "Local Player",
+  "short_name": "Player",
+  "description": "A private, local music player.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#111619",
+  "theme_color": "#111619"
+}
